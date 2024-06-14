@@ -34,8 +34,8 @@ const SignIn: React.FC = () => {
       dispatch(setUser({ token: response.data.token, userDetails: { email } }));
       navigate("/dashboard");
     } catch (error: any) {
-      if (error) {
-        toast.error(error.response, {
+      if (error.response.data.message) {
+        toast.error(error.response.data.message, {
           style: {
             border: '1px solid #ff4d4d',
             padding: '16px',

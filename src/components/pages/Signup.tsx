@@ -31,6 +31,7 @@ const SignUp: React.FC = () => {
       setError(newErrors);
       return;
     }
+    
 
     try {
       const response = await signUp(email, password);
@@ -128,7 +129,7 @@ const SignUp: React.FC = () => {
           </div>
         </div>
       </form>
-      <p className="text-red-500">{error.email || error.password}</p>
+        <p className="text-red-500">{error.email || error.password}</p>
     </div>
   );
 };

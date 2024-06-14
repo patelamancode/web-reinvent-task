@@ -1,32 +1,23 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { logout } from '../../states/slices/userSlice';
+import { RootState } from '../../states/store';
 
 const Footer: React.FC = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.reload();
-        navigate('/signin');
-        dispatch(logout());
-    }
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/signin');
+  };
 
-//     const user = useSelector((state: RootState) => state.user);
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-
-//   const handleLogout = () => {
-//     dispatch(logout());
-//     navigate('/signin');
-//   };
-
-//   if (!user.isAuthenticated) {
-//     navigate('/signin');
-//     return null;
-//   }
+  if (!user.isAuthenticated) {
+    navigate('/signin');
+    return null;
+  }
   return (
     <footer className="bg-gray-800 text-white py-4 px-6 flex justify-between items-center">
       <span className="text-lg font-bold">Web Reinvent</span>

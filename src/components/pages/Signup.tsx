@@ -3,41 +3,71 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { signUp } from "../../services/authServices";
 import { setUser } from "../../states/slices/userSlice";
+import { validateEmail, validatePassword } from "../utils/UserValidation";
+import toast from "react-hot-toast";
 
-// const handleSignUp1 = async (e: React.FormEvent<HTMLFormElement>) => {
-//   e.preventDefault();
-//   try{
-//     const response = await axios.post("https://reqres.in/api/register", {
-//       email:"VqG5V@example.com",
-//       password:"pistol"
-//     });
-//     console.log(response)
-//   }catch(error){
-//     console.error(error)
-//   }
-// }
 
 const SignUp: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log(email, password)
-
- 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<{email?:string; password?:string}>({});
+  
+  
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    const newErrors: { email?: string; password?: string } = {};
+    if (!validateEmail(email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (!validatePassword(password)) {
+      newErrors.password = "Password must be at least 6 characters long";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setError(newErrors);
+      return;
+    }
+
     try {
       const response = await signUp(email, password);
       console.log(response)
       dispatch(setUser({ token: response.data.token, userDetails: { email } }));
-      
       navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.log(error.response.data.message)
+      if (error.response.data.message) {
+        toast.error(error.response.data.message, {
+          style: {
+            border: '1px solid #ff4d4d',
+            padding: '16px',
+            color: '#ff4d4d',
+          },
+          iconTheme: {
+            primary: '#ff4d4d',
+            secondary: '#FFFAEE',
+          },
+        });
+      } else {
+        toast.error('An unexpected error occurred. Please try again.', {
+          style: {
+            border: '1px solid #ff4d4d',
+            padding: '16px',
+            color: '#ff4d4d',
+          },
+          iconTheme: {
+            primary: '#ff4d4d',
+            secondary: '#FFFAEE',
+          },
+        });
+      }
+      console.log(error);
     }
   };
+  
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -98,6 +128,7 @@ const SignUp: React.FC = () => {
           </div>
         </div>
       </form>
+      <p className="text-red-500">{error.email || error.password}</p>
     </div>
   );
 };

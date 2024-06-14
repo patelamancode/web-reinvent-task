@@ -3,22 +3,63 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { setUser } from "../../states/slices/userSlice";
 import { login } from "../../services/authServices";
+import { validateEmail, validatePassword } from "../utils/UserValidation";
+import toast from "react-hot-toast";
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<{email?:string; password?:string}>({});
+
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    const newErrors: { email?: string; password?: string } = {};
+    if (!validateEmail(email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (!validatePassword(password)) {
+      newErrors.password = "Password must be at least 6 characters long";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setError(newErrors);
+      return;
+    }
     try {
       const response = await login(email, password);
-      console.log(response);
       dispatch(setUser({ token: response.data.token, userDetails: { email } }));
       navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error) {
+        toast.error(error.response, {
+          style: {
+            border: '1px solid #ff4d4d',
+            padding: '16px',
+            color: '#ff4d4d',
+          },
+          iconTheme: {
+            primary: '#ff4d4d',
+            secondary: '#FFFAEE',
+          },
+        });
+      } else {
+        toast.error('An unexpected error occurred. Please try again.', {
+          style: {
+            border: '1px solid #ff4d4d',
+            padding: '16px',
+            color: '#ff4d4d',
+          },
+          iconTheme: {
+            primary: '#ff4d4d',
+            secondary: '#FFFAEE',
+          },
+        });
+      }
+      console.log(error);
     }
   };
 
@@ -83,6 +124,7 @@ const SignIn: React.FC = () => {
           </div>
         </div>
       </form>
+      <p className="text-red-500">{error.email || error.password}</p>
     </div>
   );
 };
